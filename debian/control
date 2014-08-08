@@ -1,0 +1,22 @@
+Source: xbmc-pvr-filmon
+Priority: extra
+Maintainer: Arne Morten Kvarving <arne.morten.kvarving@sintef.no>
+Build-Depends: debhelper (>= 8.0.0), cmake, libtinyxml-dev, xbmc-pvr-dev,
+               libxbmcplatform-dev, xbmc-addon-dev
+Standards-Version: 3.9.2
+Section: libs
+
+Package: xbmc-pvr-filmon
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: FilmOn PVR for XBMC
+ FilmOn PVR for XBMC
+
+Package: xbmc-pvr-filmon-dbg
+Section: debug
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: debug symbols for FilmOn PVR for XBMC
+ debug symbols for FilmOn PVR for XBMC
+
