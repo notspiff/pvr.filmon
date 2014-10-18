@@ -80,4 +80,5 @@ private:
 	time_t lastTimeChannels;
 	std::string username;
 	std::string password;
+	bool onLoad;
 };

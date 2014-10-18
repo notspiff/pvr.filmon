@@ -31,6 +31,7 @@ using namespace ADDON;
 
 
 PVRFilmonData::PVRFilmonData(void) {
+	onLoad = true;
 }
 
 PVRFilmonData::~PVRFilmonData(void) {
@@ -56,6 +57,7 @@ bool PVRFilmonData::Load(std::string user, std::string pwd) {
 			XBMC->QueueNotification(QUEUE_ERROR, "Filmon user failed to login");
 		}
 	}
+	onLoad = true;
 	return res;
 }
 
@@ -75,6 +77,8 @@ void PVRFilmonData::GetDriveSpace(long long *iTotal, long long *iUsed) {
 	PLATFORM::CLockObject lock(m_mutex);
 	XBMC->Log(LOG_DEBUG, "getting user storage from API");
 	filmonAPIgetUserStorage(iTotal, iUsed);
+	*iTotal = *iTotal/10;
+	*iUsed = *iUsed/10;
 	return;
 }
 
@@ -103,6 +107,11 @@ PVR_ERROR PVRFilmonData::GetChannels(ADDON_HANDLE handle, bool bRadio) {
 		channelId = channelList[i];
 		if (expired) {
 			res = filmonAPIgetChannel(channelId, &channel);
+			if (onLoad == true) {
+				XBMC->QueueNotification(QUEUE_INFO, "Filmon loaded %s",
+						channel.strChannelName.c_str());
+			}
+
 		} else {
 			for (unsigned int j = 0; j < m_channels.size(); j++) {
 				if (m_channels[j].iUniqueId == channelId) {
@@ -140,6 +149,7 @@ PVR_ERROR PVRFilmonData::GetChannels(ADDON_HANDLE handle, bool bRadio) {
 	if (expired) {
 		lastTimeChannels = time(0);
 	}
+	onLoad = false;
 	return PVR_ERROR_NO_ERROR;
 }
 

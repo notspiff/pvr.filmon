@@ -447,13 +447,17 @@ unsigned int GetChannelSwitchDelay(void) {
 void PauseStream(bool bPaused) {
 }
 bool CanPauseStream(void) {
-	return false;
+	return true;
 }
 bool CanSeekStream(void) {
-	return false;
+	return true;
 }
-bool SeekTime(int, bool, double*) {
-	return false;
+bool SeekTime(int time, bool backwards, double *startpts) {
+	if (backwards) {
+		return true;
+	} else {
+		return false;
+	}
 }
 void SetSpeed(int) {
 }

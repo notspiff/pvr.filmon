@@ -36,7 +36,7 @@
 
 #define FILMON_URL "http://www.filmon.com/"
 #define FILMON_ONE_HOUR_RECORDING_SIZE 508831234
-#define USER_AGENT "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/32.0.1700.102 Chrome/32.0.1700.102 Safari/537.36"
+#define USER_AGENT "AppleCoreMedia/1.0.0.8F455 (AppleTV; U; CPU OS 4_3 like Mac OS X; de_de)"
 #define REQUEST_LENGTH 1024
 #define REQUEST_TIMEOUT 30 // 30s
 #define REQUEST_CONNECTION_TIMEOUT 30 // 30s
@@ -277,7 +277,7 @@ bool filmonAPIkeepAlive(void) {
 
 // Session
 bool filmonAPIgetSessionKey(void) {
-	bool res = filmonRequest("tv/api/init");
+	bool res = filmonRequest("tv/api/init?channelProvider=ipad&app_id=IGlsbSBuVCJ7UDwZBl0eBR4JGgEBERhRXlBcWl0CEw==");
 	if (res == true) {
 		Json::Value root;
 		Json::Reader reader;
@@ -338,7 +338,7 @@ bool filmonAPIlogin(std::string username, std::string password) {
 // SWF player URL
 void filmonAPIgetswfPlayer() {
 	swfPlayer = std::string(
-			"/tv/modules/FilmOnTV/files/flashapp/filmon/FilmonPlayer.swf?v=55");
+			"/tv/modules/FilmOnTV/files/flashapp/filmon/FilmonPlayer.swf?v=56");
 	bool res = filmonRequest("tv/", "");
 	if (res == true) {
 		char *resp = (char *) malloc(response.size);
@@ -375,10 +375,13 @@ int filmonAPIgetGenre(std::string group) {
 	return EPG_EVENT_CONTENTMASK_UNDEFINED;
 }
 
-// Channel stream
-std::string filmonAPIgetStream(std::string url, std::string name) {
+// Channel stream (RTMP)
+std::string filmonAPIgetRtmpStream(std::string url, std::string name) {
 	char urlDelimiter = '/';
 	std::vector < std::string > streamElements;
+	if (swfPlayer.empty()) {
+		filmonAPIgetswfPlayer();
+	}
 	for (size_t p = 0, q = 0; p != url.npos; p = q) {
 		std::string element = url.substr(p + (p != 0),
 				(q = url.find(urlDelimiter, p + 1)) - p - (p != 0));
@@ -398,9 +401,6 @@ std::string filmonAPIgetStream(std::string url, std::string name) {
 
 // Channel
 bool filmonAPIgetChannel(unsigned int channelId, FILMON_CHANNEL *channel) {
-	if (swfPlayer.empty()) {
-		filmonAPIgetswfPlayer();
-	}
 	bool res = filmonRequest("tv/api/channel/" + intToString(channelId),
 			sessionKeyParam);
 	if (res == true) {
@@ -418,18 +418,22 @@ bool filmonAPIgetChannel(unsigned int channelId, FILMON_CHANNEL *channel) {
 		unsigned int stream = 0;
 		for (stream = 0; stream < streamCount; stream++) {
 			std::string quality = streams[stream]["quality"].asString();
-			if (quality.compare(std::string("high")) == 0) {
-				std::cerr << "FilmonAPI: high quality stream found"
-						<< std::endl;
+			if (quality.compare(std::string("high")) == 0 || quality.compare(std::string("480p")) == 0 || quality.compare(std::string("HD")) == 0) {
+				std::cerr << "FilmonAPI: high quality stream found: " << quality << std::endl;
 				break;
 			} else {
-				std::cerr << "FilmonAPI: low quality stream found" << std::endl;
+				std::cerr << "FilmonAPI: low quality stream found: " << quality << std::endl;
 			}
 		}
 		std::string chTitle = title.asString();
 		std::string iconPath = icon.asString();
-		streamURL = filmonAPIgetStream(streams[stream]["url"].asString(),
-				streams[stream]["name"].asString());
+		streamURL = streams[stream]["url"].asString();
+		if (streamURL.find("rtmp://") == 0) {
+			streamURL = filmonAPIgetRtmpStream(streamURL, streams[stream]["name"].asString());
+			std::cerr << "FilmonAPI: RTMP stream available: " << streamURL << std::endl;
+		} else {
+			std::cerr << "FilmonAPI: HLS stream available: " << streamURL << std::endl;
+		}
 
 		// Fix channel names logos
 		if (chTitle.compare(std::string("CBEEBIES/BBC Four")) == 0) {
