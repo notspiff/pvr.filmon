@@ -22,9 +22,9 @@
 
 #include "client.h"
 
-#include "xbmc/util/util.h"
+#include "kodi/util/util.h"
 #include "PVRFilmonData.h"
-#include "xbmc/xbmc_pvr_dll.h"
+#include "kodi/xbmc_pvr_dll.h"
 
 using namespace std;
 using namespace ADDON;
