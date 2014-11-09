@@ -12,13 +12,13 @@ find_package(Crypto++ REQUIRED)
 find_package(CURL REQUIRED)
 find_package(JsonCpp REQUIRED)
 
-include_directories(${KODIPLATFORM_INCLUDE_DIRS}
+include_directories(${kodiplatform_INCLUDE_DIRS}
                     ${CRYPTOPP_INCLUDE_DIRS}
                     ${CURL_INCLUDE_DIRS}
                     ${JSONCPP_INCLUDE_DIRS}
                     ${KODI_INCLUDE_DIR})
 
-set(DEPLIBS ${KODIPLATFORM_LIBRARIES} ${CRYPTOPP_LIBRARIES}
+set(DEPLIBS ${kodiplatform_LIBRARIES} ${CRYPTOPP_LIBRARIES}
             ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES})
 
 set(FILMON_SOURCES src/client.cpp
